@@ -19,8 +19,8 @@ module.exports = (sequelize, DataTypes) => {
       numOfSeats: {
         type: DataTypes.INTEGER,
 
-        min: 0,
         validate: {
+          min: 0,
           isPositive(value) {
             if (value < 0) {
               throw new Error("Only positive values are allowed!");
@@ -39,23 +39,9 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
 
-      full: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-        validate: {
-          isEqual() {
-            if (this.bookedSeats === this.numOfSeats) {
-              value = true;
-            }
-          },
-        },
-      },
-
       startDate: {
         type: DataTypes.DATEONLY,
         allowNull: true,
-        isAfter: DataTypes.NOW,
-
         validate: {
           bothOrNone() {
             if ((this.startDate === null) !== (this.endDate === null))
