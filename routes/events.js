@@ -12,12 +12,11 @@ const router = express.Router();
 
 //create
 router.post("/", eventCreate);
-//fully booked list
-router.get("/full", eventFull);
+// Name Detail
+router.get("/:eventName", eventName);
+
 //list
 router.get("/", eventList);
-// // Name Detail
-// router.get("/:eventName", eventName);
 
 //delete
 router.delete("/", eventDelete);

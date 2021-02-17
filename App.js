@@ -25,6 +25,6 @@ App.use((error, req, res, next) => {
 db.sequelize.sync({ alter: true });
 // db.sequelize.sync({ force: true });
 
-App.listen(8000, () => {
+App.listen(8001, () => {
   console.log("Application is running");
 });

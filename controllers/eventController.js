@@ -1,20 +1,26 @@
 const { Event } = require("../db/models");
 const { Op } = require("sequelize");
-const { sequelize } = require("sequelize");
-
-// const fetchEvent = (eventId, next);
 
 exports.eventList = async (req, res, next) => {
   try {
-    const events = await Event.findAll({
-      attributes: ["id", "name", "image"],
-      order: [
-        ["startDate", "ASC"],
-        ["name", "ASC"],
-      ],
-    });
-    res.status(200).json(events);
-    // }
+    if (Object.keys(req.body).length !== 0) {
+      const foundEvent = await Event.findAll({ where: { name: req.body } });
+      foundEvent
+        ? res.json(foundEvent)
+        : next({
+            status: 404,
+            message: "No such event found with name provided!",
+          });
+    } else {
+      const events = await Event.findAll({
+        attributes: ["id", "name", "image"],
+        order: [
+          ["startDate", "ASC"],
+          ["name", "ASC"],
+        ],
+      });
+      res.status(200).json(events);
+    }
   } catch (error) {
     next(error);
   }
@@ -29,23 +35,6 @@ exports.eventDetail = async (req, res, next) => {
     });
     if (foundEvent) res.json(foundEvent);
     else next({ status: 404, message: "No such event found!" });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.eventName = async (req, res, next) => {
-  const { eventName } = req.params;
-  console.log(typeof eventName);
-  try {
-    const foundEvent = await Event.findAll({ where: { name: "eventName" } });
-    console.log(foundEvent);
-    foundEvent
-      ? res.json(foundEvent)
-      : next({
-          status: 404,
-          message: "No such event found with name provided!",
-        });
   } catch (error) {
     next(error);
   }
@@ -91,19 +80,35 @@ exports.eventDelete = async (req, res, next) => {
   }
 };
 
-exports.eventFull = async (req, res) => {
-  try {
-    const events = await Event.findAll({
-      where: {
-        numOfSeats: {
-          [Op.col]: "Event.bookedSeats",
+exports.eventName = async (req, res, next) => {
+  const { eventName } = req.params;
+
+  if (eventName === "full") {
+    try {
+      const events = await Event.findAll({
+        where: {
+          numOfSeats: {
+            [Op.col]: "Event.bookedSeats",
+          },
         },
-      },
-    });
-    events
-      ? res.json(events)
-      : next({ status: 404, message: "No such event found!" });
+      });
+      events
+        ? res.json(events)
+        : next({ status: 404, message: "No such event found!" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+
+  try {
+    const foundEvent = await Event.findAll({ where: { name: eventName } });
+    foundEvent
+      ? res.json(foundEvent)
+      : next({
+          status: 404,
+          message: "No such event found with name provided!",
+        });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
